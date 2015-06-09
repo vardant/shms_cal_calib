@@ -245,6 +245,8 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
   Double_t        P_tr_y;   //Y FP
   Double_t        P_tr_yp;
 
+  const Double_t adc_thr = 15.;   //Low threshold on the ADC signals.
+
   // Set branch addresses.
 
   fTree->SetBranchAddress("P.pr.a_p",P_pr_a_p);
@@ -259,14 +261,15 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
   fTree->GetEntry(ientry);
 
   trk.Reset(P_tr_p, P_tr_x+D_CALO_FP*P_tr_xp, P_tr_xp,
-	    P_tr_y+D_CALO_FP*P_tr_yp, P_tr_yp);
+  	    P_tr_y+D_CALO_FP*P_tr_yp, P_tr_yp);
+  //  trk.Reset(P_tr_p, P_tr_x, P_tr_xp, P_tr_y, P_tr_yp);
 
   for (UInt_t k=0; k<THcPShTrack::fNcols_pr; k++) {
     for (UInt_t j=0; j<THcPShTrack::fNrows_pr; j++) {
 
       Double_t adc = P_pr_a_p[j][k];
 
-      if (adc > 0.) {
+      if (adc > adc_thr) {
 	UInt_t nb = j+1 + k*THcPShTrack::fNrows_pr;
 	trk.AddHit(adc, 0., nb);
       }
@@ -279,7 +282,7 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
 
       Double_t adc = P_sh_a_p[j][k];
 
-      if (adc > 0.) {
+      if (adc > adc_thr) {
 	UInt_t nb = THcPShTrack::fNpmts_pr + j+1 + k*THcPShTrack::fNrows_sh;
 	trk.AddHit(adc, 0., nb);
       }
@@ -335,6 +338,9 @@ void THcPShowerCalib::ComposeVMs() {
 	fqe[nb-1] += hit->GetEdep() * trk.GetP();
 	fq0[nb-1] += hit->GetEdep();
 
+	//if (nb==6) cout << "qe(6)= " << setprecision(20) << fqe[6-1]/1000.
+	//		<< endl;
+
 	// Save the PMT hit.
 
 	pmt_hit_list.push_back( pmt_hit{hit->GetEdep(), nb} );
@@ -385,20 +391,20 @@ void THcPShowerCalib::ComposeVMs() {
   ofstream q0out;
   q0out.open("q0.d",ios::out);
   for (UInt_t i=0; i<THcPShTrack::fNpmts; i++)
-    q0out << fq0[i] << " " << i << endl;
+    q0out << setprecision(20) << fq0[i] << " " << i << endl;
   q0out.close();
 
   ofstream qeout;
   qeout.open("qe.d",ios::out);
   for (UInt_t i=0; i<THcPShTrack::fNpmts; i++)
-    qeout << fqe[i] << " " << i << endl;
+    qeout << setprecision(20) << fqe[i] << " " << i << endl;
   qeout.close();
 
   ofstream Qout;
   Qout.open("Q.d",ios::out);
   for (UInt_t i=0; i<THcPShTrack::fNpmts; i++)
     for (UInt_t j=0; j<THcPShTrack::fNpmts; j++)
-      Qout << fQ[i][j] << " " << i << " " << j << endl;
+      Qout << setprecision(20) << fQ[i][j] << " " << i << " " << j << endl;
   Qout.close();
 
 };
@@ -427,14 +433,14 @@ void THcPShowerCalib::SolveAlphas() {
   cout << "Hit counts:" << endl;
   UInt_t j = 0;
   
-  for (Int_t k=0; k<THcPShTrack::fNcols_pr; k++) {
+  for (UInt_t k=0; k<THcPShTrack::fNcols_pr; k++) {
     k==0 ? cout << "Preshower:" : cout << "        :";
     for (UInt_t i=0; i<THcPShTrack::fNrows_pr; i++)
       cout << setw(6) << fHitCount[j++] << ",";
     cout << endl;
   }
 
-  for (Int_t k=0; k<THcPShTrack::fNcols_sh; k++) {
+  for (UInt_t k=0; k<THcPShTrack::fNcols_sh; k++) {
     k==0 ? cout << "Shower   :" : cout << "        :";
     for (UInt_t i=0; i<THcPShTrack::fNrows_sh; i++)
       cout << setw(6) << fHitCount[j++] << ",";
@@ -581,7 +587,8 @@ void THcPShowerCalib::FillHEcal() {
     fTree->SetBranchAddress("P.tr.tg_dp",&delta);
     hDPvsEcal->Fill(Enorm,delta,1.);
 
-    output << Enorm*P/1000. << " " << P/1000. << endl;
+    output << Enorm*P/1000. << " " << P/1000. << " " << trk.GetX() << " "
+	   << trk.GetY() << endl;
 
     nev++;
   };
@@ -612,14 +619,14 @@ void THcPShowerCalib::SaveAlphas() {
 
   UInt_t j = 0;
 
-  for (Int_t k=0; k<THcPShTrack::fNcols_pr; k++) {
+  for (UInt_t k=0; k<THcPShTrack::fNcols_pr; k++) {
     k==0 ? output << "shms_neg_pre_gain=" : output << "shms_pos_pre_gain=";
     for (UInt_t i=0; i<THcPShTrack::fNrows_pr; i++)
       output << fixed << setw(6) << setprecision(3) << falphaC[j++] << ",";
     output << endl;
   }
 
-  for (Int_t k=0; k<THcPShTrack::fNcols_sh; k++) {
+  for (UInt_t k=0; k<THcPShTrack::fNcols_sh; k++) {
     k==0 ? output << "shms_shower_gain =" : output << "                  ";
     for (UInt_t i=0; i<THcPShTrack::fNrows_sh; i++)
       output << fixed << setw(6) << setprecision(3) << falphaC[j++] << ",";

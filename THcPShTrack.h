@@ -48,7 +48,10 @@ class THcPShTrack {
 
   Double_t GetP() {return P*1000.;}     //MeV
 
-  Float_t Ycor(Double_t, Int_t);        // coord. corection for Preshower module
+  Double_t GetX() {return X;}
+  Double_t GetY() {return Y;}
+
+  Float_t Ycor(Double_t, UInt_t);       // coord. corection for Preshower module
 
   // Coordinate correction constants for Preshower blocks
   //
@@ -148,9 +151,13 @@ void THcPShTrack::SetEs(Double_t* alpha) {
     UInt_t nblk = (*iter)->GetBlkNumber();
 
     if(nblk <= fNrows_pr*fNcols_pr) {  //Preshower, correct for Y coordinate
-      Int_t ncol = 1;
+      UInt_t ncol = 1;
       if (nblk > fNrows_pr) ncol = 2;
       (*iter)->SetEdep(adc*Ycor(Y,ncol)*alpha[nblk-1]);
+      //if (nblk==18)
+      //cout << "THcPShTrack::SetEs: nblk= " << nblk << " Y= " << Y 
+      //<< "  ncol= " << ncol << "  ==> Ycor= " << Ycor(Y,ncol) << endl;
+      //      getchar();
     }
     else                               //Shower
       (*iter)->SetEdep(adc*alpha[nblk-1]);
@@ -179,16 +186,23 @@ Double_t THcPShTrack::Enorm() {
 // Coordinate correction for Preshower modules.
 // Fit to GEANT pion data @ 5 GeV/c (Simon).
 
-Float_t THcPShTrack::Ycor(Double_t yhit, Int_t ncol) {
+Float_t THcPShTrack::Ycor(Double_t yhit, UInt_t ncol) {
+
+  Float_t cor;
 
   // Warn if hit does not belong to Preshower.
   if (ncol > fNcols_pr || ncol < 1)
-    cout << '*** THcPShTrack::Ycor: wrong ncol = ' << ncol << ' ***' << endl;
+    cout << "*** THcPShTrack::Ycor: wrong ncol = " << ncol << " ***" << endl;
 
   // Check hit coordinate with fired block column.
-  if ((yhit < 0. && ncol == 1) || (yhit > 0. && ncol == 2))
-    return 1./(1. + TMath::Power(TMath::Abs(yhit)/fAcor, fBcor));
+  //  if ((yhit < 0. && ncol == 1) || (yhit > 0. && ncol == 2))  //Vardan's data
+  if ((yhit < 0. && ncol == 2) || (yhit > 0. && ncol == 1))  //Simon's data
+    cor = 1./(1. + TMath::Power(TMath::Abs(yhit)/fAcor, fBcor));
   else
-    return 1.;
+    cor = 1.;
 
+  //  cout << "THcShTrack::Ycor = " << cor << "  yhit = " << yhit
+  //       << "  ncol = " << ncol << endl;
+
+  return cor;
 }

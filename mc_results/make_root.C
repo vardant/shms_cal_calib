@@ -14,7 +14,7 @@ using namespace std;
 #define Nrows_sh 16
 #define Ncols_sh 14
 
-void make_root(string inp_name="5", int p_cent=5.3) {
+void make_root(string inp_name="5", int p_cent=5.) {
 
   // Input and output.
 
@@ -51,8 +51,8 @@ void make_root(string inp_name="5", int p_cent=5.3) {
   tr->Branch("P.sh.a_p", &adc_sh, leaf.c_str());
   tr->Branch("P.tr.y", &x, "P.tr.y/D");      // swap X in MC and Y in hcana
   tr->Branch("P.tr.x", &y, "P.tr.x/D");      // swap X in MC and Y in hcana
-  tr->Branch("P.tr.ph", &yp, "P.tr.ph/D");   // swap Xp in MC and Yp in hcana
-  tr->Branch("P.tr.th", &xp, "P.tr.th/D");   // swap Xp in MC and Yp in hcana
+  tr->Branch("P.tr.ph", &xp, "P.tr.ph/D");   // swap Xp in MC and Yp in hcana
+  tr->Branch("P.tr.th", &yp, "P.tr.th/D");   // swap Xp in MC and Yp in hcana
   tr->Branch("P.tr.p",  &p,  "P.tr.p/D");
   tr->Branch("P.tr.tg_dp",  &tg_dp,  "P.tr.tg_dp/D");
 

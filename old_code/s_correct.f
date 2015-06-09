@@ -9,7 +9,10 @@ c     Fit to GEANT pion data @ 5 GeV/c (Simon).
       end if
 
 c     Check hit coordinate with fired block number.
-      if((xhit.lt.0..and.icol.eq.1).or.(xhit.gt.0..and.icol.eq.2)) then
+c     With Vardan's simulated data:
+c      if((xhit.lt.0..and.icol.eq.1).or.(xhit.gt.0..and.icol.eq.2)) then
+c     With Simon's simulated data:
+      if((xhit.lt.0..and.icol.eq.2).or.(xhit.gt.0..and.icol.eq.1)) then
          x=xhit
       else
          x=0.
@@ -28,6 +31,9 @@ cc      s_correct_pr=1./s_correct_pr
 
       s_correct_pr=1.+(x/106.73)**2.329
       s_correct_pr=1./s_correct_pr
+
+cD      print*,'s_correct_pr = ',s_correct_pr, '  x = ',x,
+cD     *     '  xhit = ',xhit, '  icol = ',icol
 
       end
 

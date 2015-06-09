@@ -89,11 +89,11 @@ c
 		 if(q(i).gt.0.) then
 		    q0(i)=q0(i)+q(i)
 		    qe(i)=qe(i)+eb*q(i)
-ccD                    if(i.eq.6) then 
+                    if(i.eq.6) then 
 ccD                       print*,'q0(6)=',q0(6)
 ccD                       print*,'qe(6)=',qe(6)
 ccD                       print*,'q(6)=',q(6)
-ccD                    end if
+                    end if
 		    do j=1,npmts
 		       qm(i,j)=qm(i,j)+q(i)*q(j)
 ccD                       if(i.eq.6.and.j.eq.6) print*,'qm(6,6)=',qm(6,6)
@@ -120,6 +120,28 @@ ccD        pause
 	   end do
 	end do
 	e0=e0/nev
+
+c     Debug outputs.
+
+        open(spare_id, file='qm.d')
+        do j=1,npmts
+           do i=1,npmts
+              write(spare_id,*) qm(i,j),i,j
+           end do
+        end do
+        close(spare_id)
+
+        open(spare_id, file='q0.d')
+        do i=1,npmts
+           write(spare_id,*) q0(i),i
+        end do
+        close(spare_id)
+
+        open(spare_id, file='qe.d')
+        do i=1,npmts
+           write(spare_id,*) qe(i),i
+        end do
+        close(spare_id)
 
 	numsel=0
 	do i=1,npmts
@@ -362,6 +384,9 @@ ccD                  if(icol.eq.1.and.irow.eq.6) then
 ccD                     print*,'get_data: qdc, q, nb=',qdc,q(nb),nb
 ccD                     print*,'    xh, cor=',xh,s_correct_pr(xh,icol)
 ccD                  end if
+                  if(nb.eq.18) print*,'nb, xh, icol, cor = ',
+     *                 nb, xh, icol, s_correct_pr(xh,icol)
+
                elseif(idet.eq.2) then !shower
                   nb=2*nrow_pr+(icol-1)*nrow_sh+irow
                   q(nb)=qdc*s_correct_sh(xh,yh,icol,irow)

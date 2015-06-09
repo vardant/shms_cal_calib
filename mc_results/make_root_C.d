@@ -33,4 +33,4 @@
 ./make_root_C.so: /usr/include/root/RConfigure.h
 ./make_root_C.so: /usr/include/root/TVirtualTreePlayer.h
 ./make_root_C.so: /usr/include/root/cintdictversion.h /usr/include/root/RVersion.h
-make_root_C__ROOTBUILDVERSION= 5.34/28
+make_root_C__ROOTBUILDVERSION= 5.34/30
