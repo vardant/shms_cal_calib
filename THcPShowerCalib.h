@@ -203,6 +203,8 @@ void THcPShowerCalib::CalcThresholds() {
 
   fLoThr = mean - 3.*rms;
   fHiThr = mean + 3.*rms;
+  //  fLoThr = 0.;              // Wide open thrsholds for
+  //  fHiThr = 1.e+8;           // comparison with the old code.
 
   cout << "CalcThreshods: fLoThr=" << fLoThr << "  fHiThr=" << fHiThr 
        << "  nev=" << nev << endl;
