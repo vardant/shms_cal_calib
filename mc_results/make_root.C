@@ -6,8 +6,8 @@
 
 using namespace std;
 
-// Given result file from the SHMS calorimeter simulation, Generate
-// root file output.
+// Generate root file output from input file from the SHMS calorimeter
+// simulation.
 
 #define Nrows_pr 14
 #define Ncols_pr  2
@@ -33,16 +33,11 @@ void make_root(string inp_name="5", int p_cent=5.) {
   double x, y, xp, yp, p;
   int ind;
   double tg_dp;
-  /*
-  const int Nrows_pr = 14;
-  const int Ncols_pr =  2;
-  const int Nrows_sh = 16;
-  const int Ncols_sh = 14;
-  */
+
   double adc_pr[Nrows_pr][Ncols_pr];
   double adc_sh[Nrows_sh][Ncols_sh];
 
-  // Output tree.
+  // The output tree.
 
   TTree *tr = new TTree("T", "SHMS calo. MC events");
   string leaf = Form("P.pr.a_p[%i][%i]/D", Nrows_pr, Ncols_pr);
@@ -59,6 +54,7 @@ void make_root(string inp_name="5", int p_cent=5.) {
   // Read and fill tree cicle.
 
   while (fin >> nhit >> x >> y >> xp >> yp >> p >> ind) {
+
     //    cout << nhit << " " << x << " " << y << " " << xp << " " << yp << " "
     //	 << p << " " << ind << endl;
 
@@ -80,10 +76,10 @@ void make_root(string inp_name="5", int p_cent=5.) {
 
       if (adc > 0) {
 	switch (det) {
-	case 1 :
+	case 1 :                        //Preshower
 	  adc_pr[row-1][col-1] = adc;
 	  break;
-	case 2 :
+	case 2 :                        //Shower
 	  adc_sh[row-1][col-1] = adc;
 	  break;
 	default:

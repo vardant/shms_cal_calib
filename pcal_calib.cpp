@@ -16,7 +16,7 @@ void pcal_calib(Int_t RunNumber) {
  theShowerCalib.ComposeVMs();      // Compute vectors amd matrices for calib.
  theShowerCalib.SolveAlphas();     // Solve for the calibration constants
  theShowerCalib.SaveAlphas();      // Save the constants
- theShowerCalib.SaveRawData();  // Save raw data into file for debug purposes
+ theShowerCalib.SaveRawData();     // Save raw data into file for debug purposes
  theShowerCalib.FillHEcal();       // Fill histograms
 
  // Plot histograms
@@ -39,7 +39,7 @@ void pcal_calib(Int_t RunNumber) {
  Canvas->cd(3);
  theShowerCalib.hEcal->Fit("gaus");
 
- // HMS delta(P) versus the calibrated energy deposition.
+ // SHMS delta(P) versus the calibrated energy deposition.
 
  Canvas->cd(4);
  theShowerCalib.hDPvsEcal->Draw();

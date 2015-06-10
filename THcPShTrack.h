@@ -28,6 +28,7 @@ class THcPShTrack {
   THcPShHitList Hits;
 
  public:
+
   THcPShTrack();
   THcPShTrack(Double_t p, Double_t x, Double_t xp, Double_t y, Double_t yp);
   ~THcPShTrack();
@@ -60,7 +61,6 @@ class THcPShTrack {
 
   // Calorimeter geometry constants.
   //
-  //  static const Double_t fZbl = 10;   //cm, Preshower block transverse size
   static const UInt_t fNrows_pr = 14;    //Row number for Preshower
   static const UInt_t fNrows_sh = 16;    //Row number for Shower
   static const UInt_t fNcols_pr =  2;    //2 columns in Preshower
@@ -117,6 +117,8 @@ THcPShHit* THcPShTrack::GetHit(UInt_t k) {
   return *it;
 }
 
+//------------------------------------------------------------------------------
+
 void THcPShTrack::Print(ostream & ostrm) {
 
   // Output the track parameters and hit list through the stream ostrm.
@@ -150,16 +152,14 @@ void THcPShTrack::SetEs(Double_t* alpha) {
     Double_t adc = (*iter)->GetADC();
     UInt_t nblk = (*iter)->GetBlkNumber();
 
-    if(nblk <= fNrows_pr*fNcols_pr) {  //Preshower, correct for Y coordinate
+    if(nblk <= fNrows_pr*fNcols_pr) {
+      //Preshower block, correct for Y coordinate
       UInt_t ncol = 1;
       if (nblk > fNrows_pr) ncol = 2;
       (*iter)->SetEdep(adc*Ycor(Y,ncol)*alpha[nblk-1]);
-      //if (nblk==18)
-      //cout << "THcPShTrack::SetEs: nblk= " << nblk << " Y= " << Y 
-      //<< "  ncol= " << ncol << "  ==> Ycor= " << Ycor(Y,ncol) << endl;
-      //      getchar();
     }
-    else                               //Shower
+    else
+      //Shower block, no coordinate correction.
       (*iter)->SetEdep(adc*alpha[nblk-1]);
 
   };
@@ -178,7 +178,7 @@ Double_t THcPShTrack::Enorm() {
     sum += (*iter)->GetEdep();
   };
 
-  return sum/P/1000.;
+  return sum/P/1000.;         //Momentum in MeV.
 }
 
 //------------------------------------------------------------------------------
@@ -191,16 +191,19 @@ Float_t THcPShTrack::Ycor(Double_t yhit, UInt_t ncol) {
   Float_t cor;
 
   // Warn if hit does not belong to Preshower.
+  //
   if (ncol > fNcols_pr || ncol < 1)
     cout << "*** THcPShTrack::Ycor: wrong ncol = " << ncol << " ***" << endl;
 
-  // Check hit coordinate with fired block column.
-  //  if ((yhit < 0. && ncol == 1) || (yhit > 0. && ncol == 2))  //Vardan's data
-  if ((yhit < 0. && ncol == 2) || (yhit > 0. && ncol == 1))  //Simon's data
+  // Check if the hit coordinate matches the fired block's column.
+  //
+  //if ((yhit < 0. && ncol == 1) || (yhit > 0. && ncol == 2)) //Vardan's MC data
+  if ((yhit < 0. && ncol == 2) || (yhit > 0. && ncol == 1))   //Simon's MC data
     cor = 1./(1. + TMath::Power(TMath::Abs(yhit)/fAcor, fBcor));
   else
     cor = 1.;
 
+  // Debug output.
   //  cout << "THcShTrack::Ycor = " << cor << "  yhit = " << yhit
   //       << "  ncol = " << ncol << endl;
 

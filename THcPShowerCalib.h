@@ -21,12 +21,13 @@
 using namespace std;
 
 //
-// SHMS Shower Counter calibration class.
+// SHMS Calorimeter calibration class.
 //
 
 class THcPShowerCalib {
 
  public:
+
   THcPShowerCalib(Int_t);
   THcPShowerCalib();
   ~THcPShowerCalib();
@@ -46,10 +47,12 @@ class THcPShowerCalib {
   TH2F* hDPvsEcal;
 
  private:
+
   Int_t fRunNumber;
   Double_t fLoThr;     // Low and high thresholds on the normalized uncalibrated
   Double_t fHiThr;     // energy deposition.
   UInt_t fNev;         // Number of processed events.
+
   static const UInt_t fMinHitCount = 5;     // Minimum number of hits for a PMT
                                             // to be calibrated.
 
@@ -134,7 +137,7 @@ void THcPShowerCalib::Init() {
   hDPvsEcal = new TH2F("hDPvsEcal", "#DeltaP versus Edep/P ",
 		       350,0.,1.5, 250,-12.5,22.5);
 
-  // Initialize qumulative quantities.
+  // Initialize cumulative quantities.
   
   for (UInt_t i=0; i<THcPShTrack::fNpmts; i++) fHitCount[i] = 0;
 
@@ -198,10 +201,8 @@ void THcPShowerCalib::CalcThresholds() {
   Double_t rms = hEunc->GetRMS();
   cout << "CalcThreshods: mean=" << mean << "  rms=" << rms << endl;
 
-  //  fLoThr = mean - 3.*rms;
-  //  fHiThr = mean + 3.*rms;
-  fLoThr = 0.;
-  fHiThr = 1.e+8;
+  fLoThr = mean - 3.*rms;
+  fHiThr = mean + 3.*rms;
 
   cout << "CalcThreshods: fLoThr=" << fLoThr << "  fHiThr=" << fHiThr 
        << "  nev=" << nev << endl;
@@ -232,7 +233,7 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
 
   // Declaration of leaves types
 
-  // Calorimeter ADC signals.
+  // Preshower and Shower ADC signals.
 
   Double_t        P_pr_a_p[THcPShTrack::fNrows_pr][THcPShTrack::fNcols_pr];
   Double_t        P_sh_a_p[THcPShTrack::fNrows_sh][THcPShTrack::fNcols_sh];
@@ -260,9 +261,12 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
 
   fTree->GetEntry(ientry);
 
+  // Set track coordinates and slopes at the face of Preshower.
+
   trk.Reset(P_tr_p, P_tr_x+D_CALO_FP*P_tr_xp, P_tr_xp,
   	    P_tr_y+D_CALO_FP*P_tr_yp, P_tr_yp);
-  //  trk.Reset(P_tr_p, P_tr_x, P_tr_xp, P_tr_y, P_tr_yp);
+
+  // Set Preshower hits.
 
   for (UInt_t k=0; k<THcPShTrack::fNcols_pr; k++) {
     for (UInt_t j=0; j<THcPShTrack::fNrows_pr; j++) {
@@ -276,6 +280,8 @@ void THcPShowerCalib::ReadShRawTrack(THcPShTrack &trk, UInt_t ientry) {
 
     }
   }
+
+  // Set Shower hits.
 
   for (UInt_t k=0; k<THcPShTrack::fNcols_sh; k++) {
     for (UInt_t j=0; j<THcPShTrack::fNrows_sh; j++) {
@@ -337,9 +343,6 @@ void THcPShowerCalib::ComposeVMs() {
 
 	fqe[nb-1] += hit->GetEdep() * trk.GetP();
 	fq0[nb-1] += hit->GetEdep();
-
-	//if (nb==6) cout << "qe(6)= " << setprecision(20) << fqe[6-1]/1000.
-	//		<< endl;
 
 	// Save the PMT hit.
 
@@ -561,8 +564,9 @@ void THcPShowerCalib::SolveAlphas() {
 void THcPShowerCalib::FillHEcal() {
 
   //
-  // Fill histogram of the normalized energy deposition, 2-d histogram
+  // Fill histogram of the normalized energy deposition, and 2-d histogram
   // of momentum deviation versus normalized energy deposition.
+  // Output event by event energy depositions and momenta for debug purposes.
   //
 
   ofstream output;

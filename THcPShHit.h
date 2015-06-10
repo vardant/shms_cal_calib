@@ -5,8 +5,8 @@
 class THcPShHit {
 
   Double_t ADC;        // pedestal subtracted ADC signal.
-  Double_t Edep;       // Energy depositions seen from pos. & neg. sides
-  UInt_t BlkNumber;
+  Double_t Edep;       // Energy deposition.
+  UInt_t BlkNumber;    // Block number.
 
  public:
 
@@ -53,5 +53,7 @@ void THcPShHit::Print(ostream & ostrm) {
 
   ostrm << ADC << " " << Edep << " " << BlkNumber << endl;
 };
+
+//------------------------------------------------------------------------------
 
 struct pmt_hit {Double_t signal; UInt_t channel;};
